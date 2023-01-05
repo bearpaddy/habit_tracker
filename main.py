@@ -4,17 +4,49 @@ import os
 
 class User:
 
-    def create_pixela_account():
+    def __init__(self, username:str, token:str) -> None:
+        self.default_url = os.environ.get("PIXELA_ENDPOINT")
+        self.username = username
+        self.token = token
+        self.request_params = self.create_request_arguments()
     
-        pixela_endpoint = "https://pixe.la/v1/users"
+    @property
+    def username(self):
+        return self._username
+
+    @username.setter
+    def username(self, value):
+        if isinstance(value, str):
+            self._username = value
+        else:
+            raise ValueError("Username must be string")
+    
+    @property
+    def token(self):
+        return self._token
+    
+    @token.setter
+    def token(self, value):
+        if isinstance(value, str) and 10 < len(value) < 30:
+            self._token = value
+        else:
+            raise ValueError("Token must be string and between 10-20 characters")
+
+
+    def create_request_arguments(self):
         user_params = {
-            "token": "fjdhakcdv1likj",
-            "username": "jkim",
+            "token": self.token,
+            "username": self.username,
             "agreeTermsOfService": "yes",
             "notMinor": "yes"
         }
-        response = requests.post(pixela_endpoint, json=user_params)
-        return response.status_code
+        return user_params
+    
+
+    def create_new_user(self) -> bool:
+        response = requests.post(self.default_url, json=self.request_params)
+        is_successful = True if response.status_code == 404 else False
+        return is_successful
 
 class Habit:
 
